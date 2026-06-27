@@ -1,6 +1,3 @@
-// app/templates/page.js
-// coba2
-// tes
 "use client";
 
 import { useEffect, useState } from "react";
@@ -14,15 +11,12 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true);
   const [previews, setPreviews] = useState({});
 
-  // Ambil data dari Firestore saat halaman pertama kali dibuka
   useEffect(() => {
     const getTemplates = async () => {
       try {
         const q = query(collection(db, "templates"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        setTemplates(
-          snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        );
+        setTemplates(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
       } catch (e) {
         console.error("Gagal mengambil data:", e);
       } finally {
@@ -32,9 +26,7 @@ export default function TemplatesPage() {
     getTemplates();
   }, []);
 
-  // Baca file Excel dari URL dan tampilkan 5 baris pertama
   const handlePreview = async (id, xlsxUrl) => {
-    // Kalau sudah tampil, sembunyikan (toggle)
     if (previews[id]) {
       setPreviews((prev) => ({ ...prev, [id]: null }));
       return;
@@ -52,37 +44,33 @@ export default function TemplatesPage() {
   };
 
   return (
-    <>
-      {/* ── Navbar ── */}
+    <div>
       <header className="w-full sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
-          <Link href="/" className="text-2xl font-bold text-[#005931]">
+          <Link href="/" className="text-2xl font-bold text-green-800">
             Nuwana Excel
           </Link>
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="text-[#005931] font-semibold px-4 py-2 rounded-lg border border-[#005931] hover:bg-[#f0eded] transition-colors text-sm"
+              className="text-green-800 font-semibold px-4 py-2 rounded-lg border border-green-800 hover:bg-gray-100 transition-colors text-sm"
             >
               Login
             </Link>
             <Link
               href="/upload"
-              className="bg-[#005931] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#217346] transition-colors text-sm"
+              className="bg-green-800 text-white font-semibold px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
             >
-              + Upload
+              Upload
             </Link>
           </div>
         </nav>
       </header>
 
-      {/* ── Konten Utama ── */}
-      <main className="min-h-screen bg-[#f6f3f2] px-6 py-12">
+      <main className="min-h-screen bg-gray-50 px-6 py-12">
         <div className="max-w-7xl mx-auto">
-
-          {/* Judul halaman */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-[#005931] mb-3">
+            <h1 className="text-4xl font-bold text-green-800 mb-3">
               Template Excel
             </h1>
             <p className="text-gray-500 text-lg">
@@ -90,39 +78,32 @@ export default function TemplatesPage() {
             </p>
           </div>
 
-          {/* ── State: Loading ── */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-3">
-              <div className="w-10 h-10 border-4 border-[#005931] border-t-transparent rounded-full animate-spin" />
+              <div className="w-10 h-10 border-4 border-green-800 border-t-transparent rounded-full animate-spin"></div>
               <p className="text-gray-500 text-sm">Memuat template...</p>
             </div>
           )}
 
-          {/* ── State: Kosong ── */}
           {!loading && templates.length === 0 && (
             <div className="text-center py-24">
-              <p className="text-5xl mb-4">📂</p>
-              <p className="text-gray-500 text-lg mb-6">
-                Belum ada template. Jadilah yang pertama upload!
-              </p>
+              <p className="text-gray-400 text-lg mb-6">Belum ada template.</p>
               <Link
                 href="/upload"
-                className="bg-[#005931] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#217346] transition-colors"
+                className="bg-green-800 text-white font-semibold px-6 py-3 rounded-xl hover:bg-green-700 transition-colors"
               >
                 Upload Template
               </Link>
             </div>
           )}
 
-          {/* ── Grid Template ── */}
           {!loading && templates.length > 0 && (
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map((t) => (
                 <div
                   key={t.id}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:-translate-y-1 transition-transform duration-200"
+                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm"
                 >
-                  {/* Video player */}
                   <div className="h-48 bg-gray-900">
                     <video
                       src={t.videoUrl}
@@ -131,57 +112,37 @@ export default function TemplatesPage() {
                       controls
                     />
                   </div>
-
-                  {/* Info & tombol */}
                   <div className="p-5">
-                    <h3 className="text-lg font-bold text-gray-800 mb-1 line-clamp-2">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">
                       {t.judul}
                     </h3>
-                    <p className="text-xs text-gray-400 mb-4">
-                      {t.createdAt?.toDate
-                        ? t.createdAt.toDate().toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
-                        : ""}
-                    </p>
-
-                    {/* Tombol Download & Preview */}
                     <div className="flex gap-3">
-                      {/* Download — pakai tag <a> biasa, bukan emoji */}
                       
                         href={t.xlsxUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 text-center bg-[#005931] text-white font-semibold py-2 rounded-lg hover:bg-[#217346] transition-colors text-sm"
+                        className="flex-1 text-center bg-green-800 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
                       >
                         Download Excel
                       </a>
-
-                      {/* Preview */}
                       <button
                         onClick={() => handlePreview(t.id, t.xlsxUrl)}
-                        className="px-4 py-2 border border-[#005931] text-[#005931] font-semibold rounded-lg hover:bg-[#f0eded] transition-colors text-sm"
+                        className="px-4 py-2 border border-green-800 text-green-800 font-semibold rounded-lg hover:bg-gray-100 transition-colors text-sm"
                       >
                         {previews[t.id] ? "Tutup" : "Preview"}
                       </button>
                     </div>
 
-                    {/* Tabel Preview Excel */}
                     {previews[t.id] && (
                       <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200">
-                        <p className="text-xs text-gray-400 px-3 pt-2">
-                          Preview 5 baris pertama:
-                        </p>
-                        <table className="w-full text-xs border-collapse mt-1">
+                        <table className="w-full text-xs border-collapse">
                           <tbody>
                             {previews[t.id].map((row, rowIdx) => (
                               <tr
                                 key={rowIdx}
                                 className={
                                   rowIdx === 0
-                                    ? "bg-[#d0e5d2] font-semibold"
+                                    ? "bg-green-100 font-semibold"
                                     : rowIdx % 2 === 0
                                     ? "bg-gray-50"
                                     : "bg-white"
@@ -209,12 +170,11 @@ export default function TemplatesPage() {
         </div>
       </main>
 
-      {/* ── Footer ── */}
       <footer className="bg-white border-t border-gray-200 py-6 text-center">
         <p className="text-sm text-gray-400">
-          © 2024 Nuwana Excel. Structured Wisdom for Professionals.
+          2024 Nuwana Excel. Structured Wisdom for Professionals.
         </p>
       </footer>
-    </>
+    </div>
   );
 }
